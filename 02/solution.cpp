@@ -38,13 +38,14 @@ static int countChecksum(const vector<string>& ids) {
 }
 
 // NB. Modifies the input array
-string findCommonCharsOfCorrectIDs(vector<string>& ids) {
+string findCommonCharsOfCorrectIDsForward(vector<string>& ids) {
   sort(ids.begin(), ids.end());
   for (int i = ids.size() - 1; i > 0; i--) {
     const string& id1 = ids[i];
     const string& id2 = ids[i - 1];
-    int pos1 = 0, pos2 = 0;
-    while (pos1 < id1.size() && pos2 < id2.size()) {
+    int pos1 = 0;
+    int pos2 = 0;
+        while (pos1 < id1.size() && pos1 >= 0 && pos2 < id2.size() && pos2 >= 0) {
       if (id1[pos1] != id2[pos2]) {
 	if (id1.compare(pos1 + 1, id1.size() - pos1 - 1,
 			id2, pos2 + 1, id2.size() - pos2 - 1) == 0) {
@@ -58,6 +59,21 @@ string findCommonCharsOfCorrectIDs(vector<string>& ids) {
     }
   }
   return "";
+}
+
+string findCommonCharsOfCorrectIDs(vector<string>& ids) {
+  string res = findCommonCharsOfCorrectIDsForward(ids);
+  if (res == "") {
+    // If the forward pass fails, do a pass in reverse direction
+    transform(ids.begin(), ids.end(), ids.begin(), [](string& s) {
+	string res = s;
+	reverse(s.begin(), s.end());
+	return s;
+     });
+    res = findCommonCharsOfCorrectIDsForward(ids);
+    reverse(res.begin(), res.end());
+  }
+  return res;
 }
 
 
